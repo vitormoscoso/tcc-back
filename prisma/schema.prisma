@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Resenha {
+  id_resenha   Int       @id @default(autoincrement())
+  uid_firebase String
+  id_livro     String    // ISBN
+  nota         Int
+  comentario   String
+  comentarios  Comentario[] // relação 1:N com Comentário
+}
+
+model Comentario {
+  id_comentario Int         @id @default(autoincrement())
+  id_resenha    Int
+  uid_firebase  String
+  comentario    String
+  id_resposta   Int?        // autorrelacionamento
+  resposta      Comentario? @relation("Resposta", fields: [id_resposta], references: [id_comentario])
+  respostas     Comentario[] @relation("Resposta")
+
+  resenha       Resenha     @relation(fields: [id_resenha], references: [id_resenha])
+}
+
+model ListaLivros {
+  id_lista     Int     @id @default(autoincrement())
+  uid_firebase String
+  isbn         String
+  tipo_lista   TipoLista
+}
+
+enum TipoLista {
+  favoritos
+  para_ler
+  avaliados
+}
