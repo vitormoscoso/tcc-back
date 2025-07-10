@@ -56,4 +56,23 @@ export class BooksService {
       return books;
     }
   }
+
+  async getBooksBySubject(subject: string) {
+    const url = `https://openlibrary.org/subjects/${encodeURIComponent(subject)}.json`;
+    const response = await firstValueFrom(this.httpService.get(url));
+    const works = response.data?.works || [];
+
+    return works
+      .filter(work => work.cover_id && work.cover_edition_key)
+      .slice(0, 10)
+      .map((work) => ({
+        id: work.cover_edition_key,
+        title: work.title,
+        author: work.authors?.[0]?.name || null,
+        publishYear: work.first_publish_year || null,
+        coverUrl: work.cover_id
+          ? `https://covers.openlibrary.org/b/id/${work.cover_id}-L.jpg`
+          : null,
+      }));
+  }
 }

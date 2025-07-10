@@ -13,4 +13,12 @@ export class BooksController {
 
     return this.booksService.searchBooks(query);
   }
+
+  @Get('categories')
+  async getBooksBySubject(@Query('subject') subject: string) {
+    if (!subject) {
+      throw new BadRequestException('Você deve informar um assunto.');
+    }
+    return this.booksService.getBooksBySubject(subject);
+  }
 }
