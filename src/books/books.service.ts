@@ -1,10 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { AuthorsService } from 'src/authors/authors.service';
 
 @Injectable()
 export class BooksService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly authorsService: AuthorsService,
+  ) {}
 
   private isISBN(input: string): boolean {
     const cleaned = input.replace(/[-\s]/g, '');
@@ -63,7 +67,7 @@ export class BooksService {
     const works = response.data?.works || [];
 
     return works
-      .filter(work => work.cover_id && work.cover_edition_key)
+      .filter((work) => work.cover_id && work.cover_edition_key)
       .slice(0, 10)
       .map((work) => ({
         id: work.cover_edition_key,
@@ -74,5 +78,33 @@ export class BooksService {
           ? `https://covers.openlibrary.org/b/id/${work.cover_id}-L.jpg`
           : null,
       }));
+  }
+
+  async getBookDetailsById(id: string) {
+    const url = `https://openlibrary.org/books/${id}.json`;
+    const response = await firstValueFrom(this.httpService.get(url));
+    const data = response.data;
+
+    const authorKeys = data.authors?.map((a) => a.key) || [];
+
+    const authors = await Promise.all(
+      authorKeys.map((key) => this.authorsService.getAuthorData(key)),
+    );
+
+    return {
+      id,
+      title: data.title,
+      subtitle: data.subtitle || null,
+      description:
+        typeof data.description === 'string'
+          ? data.description
+          : data.description?.value || null,
+      publishDate: data.publish_date.split(',')[1].trim() || null,
+      numberOfPages: data.number_of_pages || null,
+      coverUrl: data.covers?.[0]
+        ? `https://covers.openlibrary.org/b/id/${data.covers[0]}-L.jpg`
+        : null,
+      authors: authors.filter(Boolean),
+    };
   }
 }

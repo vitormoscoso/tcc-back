@@ -1,4 +1,10 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { BooksService } from './books.service';
 
 @Controller('books')
@@ -20,5 +26,10 @@ export class BooksController {
       throw new BadRequestException('Você deve informar um assunto.');
     }
     return this.booksService.getBooksBySubject(subject);
+  }
+
+  @Get(':id')
+  async getBookDetails(@Param('id') id: string) {
+    return this.booksService.getBookDetailsById(id);
   }
 }
