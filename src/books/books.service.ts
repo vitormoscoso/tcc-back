@@ -103,7 +103,7 @@ export class BooksService {
         typeof data.description === 'string'
           ? data.description
           : data.description?.value || null,
-      publishDate: data.publish_date.split(',')[1].trim() || null,
+      publishDate: data.publish_date || null,
       numberOfPages: data.number_of_pages || null,
       coverUrl: data.covers?.[0]
         ? `https://covers.openlibrary.org/b/id/${data.covers[0]}-L.jpg`
