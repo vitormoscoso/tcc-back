@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthorsService } from 'src/authors/authors.service';
 import { PrismaService } from 'src/database/prisma.service';
+import { FirebaseAdminService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class BooksService {
@@ -10,6 +11,7 @@ export class BooksService {
     private readonly httpService: HttpService,
     private readonly authorsService: AuthorsService,
     private readonly prisma: PrismaService,
+    private readonly firebase: FirebaseAdminService,
   ) {}
 
   private isISBN(input: string): boolean {
@@ -111,25 +113,22 @@ export class BooksService {
   }
 
   async getReviewsByBookId(id_livro: string) {
-    return this.prisma.resenha.findMany({
+    const resenhas = await this.prisma.resenha.findMany({
       where: { id_livro },
-      select: {
-        id_resenha: true,
-        uid_firebase: true,
-        nota: true,
-        comentario: true,
-        comentarios: {
-          select: {
-            id_comentario: true,
-            comentario: true,
-            uid_firebase: true,
-            id_resposta: true
-          }
-        }
-      },
-      orderBy: {
-        id_resenha: 'desc'
-      }
+      orderBy: { id_resenha: 'desc' },
     });
+  
+    return await Promise.all(
+      resenhas.map(async (r) => {
+        const userInfo = await this.firebase.getUserInfo(r.uid_firebase);
+        return {
+          id_resenha: r.id_resenha,
+          comentario: r.comentario,
+          nota: r.nota,
+          uid_firebase: r.uid_firebase,
+          autor: userInfo ?? { displayName: null, photoURL: null },
+        };
+      })
+    );
   }
 }
