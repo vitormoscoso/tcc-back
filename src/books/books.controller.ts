@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   Param,
-  Query,
+  Post,
+  Query
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 
@@ -36,5 +38,10 @@ export class BooksController {
   @Get(':id/reviews')
   async getReviews(@Param('id') id: string) {
     return this.booksService.getReviewsByBookId(id);
+  }
+
+  @Post('review')
+  async createComment(@Body() body: any){
+    return this.booksService.createComment(body);
   }
 }
