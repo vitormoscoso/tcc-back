@@ -116,17 +116,40 @@ export class BooksService {
     const resenhas = await this.prisma.resenha.findMany({
       where: { id_livro },
       orderBy: { id_resenha: 'desc' },
+      include: {
+        comentarios: {
+          select: {
+            id_comentario: true,
+            comentario: true,
+            uid_firebase: true,
+            id_resposta: true,
+          },
+        },
+      },
     });
   
     return await Promise.all(
-      resenhas.map(async (r) => {
-        const userInfo = await this.firebase.getUserInfo(r.uid_firebase);
+      resenhas.map(async (resenha) => {
+        const autor = await this.firebase.getUserInfo(resenha.uid_firebase);
+  
+        // Enriquecer também os autores dos comentários, se necessário
+        const comentarios = await Promise.all(
+          resenha.comentarios.map(async (comentario) => {
+            const autorComentario = await this.firebase.getUserInfo(comentario.uid_firebase);
+            return {
+              ...comentario,
+              autor: autorComentario ?? { displayName: null, photoURL: null },
+            };
+          })
+        );
+  
         return {
-          id_resenha: r.id_resenha,
-          comentario: r.comentario,
-          nota: r.nota,
-          uid_firebase: r.uid_firebase,
-          autor: userInfo ?? { displayName: null, photoURL: null },
+          id_resenha: resenha.id_resenha,
+          comentario: resenha.comentario,
+          nota: resenha.nota,
+          uid_firebase: resenha.uid_firebase,
+          autor: autor ?? { displayName: null, photoURL: null },
+          comentarios,
         };
       })
     );
