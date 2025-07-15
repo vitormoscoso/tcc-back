@@ -2,12 +2,14 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthorsService } from 'src/authors/authors.service';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class BooksService {
   constructor(
     private readonly httpService: HttpService,
     private readonly authorsService: AuthorsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private isISBN(input: string): boolean {
@@ -106,5 +108,28 @@ export class BooksService {
         : null,
       authors: authors.filter(Boolean),
     };
+  }
+
+  async getReviewsByBookId(id_livro: string) {
+    return this.prisma.resenha.findMany({
+      where: { id_livro },
+      select: {
+        id_resenha: true,
+        uid_firebase: true,
+        nota: true,
+        comentario: true,
+        comentarios: {
+          select: {
+            id_comentario: true,
+            comentario: true,
+            uid_firebase: true,
+            id_resposta: true
+          }
+        }
+      },
+      orderBy: {
+        id_resenha: 'desc'
+      }
+    });
   }
 }

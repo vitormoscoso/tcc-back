@@ -32,4 +32,9 @@ export class BooksController {
   async getBookDetails(@Param('id') id: string) {
     return this.booksService.getBookDetailsById(id);
   }
+
+  @Get(':id/reviews')
+  async getReviews(@Param('id') id: string) {
+    return this.booksService.getReviewsByBookId(id);
+  }
 }
