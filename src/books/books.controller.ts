@@ -40,7 +40,7 @@ export class BooksController {
     return this.booksService.getReviewsByBookId(id);
   }
 
-  @Post('review')
+  @Post('review/comment')
   async createComment(@Body() body: any){
     return this.booksService.createComment(body);
   }
