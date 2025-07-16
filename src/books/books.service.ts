@@ -155,6 +155,17 @@ export class BooksService {
     );
   }
 
+  async createReview(data: any){
+    return this.prisma.resenha.create({
+      data: {
+        id_livro: data.id_livro,
+        uid_firebase: data.uid_firebase,
+        nota: data.nota,
+        comentario: data.comentario,
+      },
+    });
+  }
+
   async createComment(data: any){
     return this.prisma.comentario.create({
       data: {

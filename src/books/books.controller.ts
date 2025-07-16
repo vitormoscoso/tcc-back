@@ -40,6 +40,11 @@ export class BooksController {
     return this.booksService.getReviewsByBookId(id);
   }
 
+  @Post('review')
+  async createReview(@Body() body: any){
+    return this.booksService.createReview(body);
+  }
+
   @Post('review/comment')
   async createComment(@Body() body: any){
     return this.booksService.createComment(body);
