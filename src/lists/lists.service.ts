@@ -13,6 +13,15 @@ export class ListsService {
     private readonly firebase: FirebaseAdminService,
   ) {}
 
+  async getList(uid_firebase: string, list_type: string) {
+    return this.prisma.listaLivros.findMany({
+      where: {
+        uid_firebase,
+        tipo_lista: list_type as any
+      },
+    });
+  }
+
   async addBookToList(data: any){
     return this.prisma.listaLivros.create({
       data: {
