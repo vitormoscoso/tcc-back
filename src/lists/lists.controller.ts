@@ -41,7 +41,7 @@ export class ListsController {
   }
 
   @Post('/')
-  async createReview(@Body() body: any) {
+  async addBook(@Body() body: any) {
     return this.listsService.addBookToList(body);
   }
 }
