@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Query,
@@ -43,5 +44,14 @@ export class ListsController {
   @Post('/')
   async addBook(@Body() body: any) {
     return this.listsService.addBookToList(body);
+  }
+
+  @Delete('/')
+  async removeBook(@Body() body: any) {
+    return this.listsService.removeBookFromList(
+      body.uid_firebase,
+      body.id,
+      body.list_type,
+    );
   }
 }

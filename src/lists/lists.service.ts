@@ -30,6 +30,20 @@ export class ListsService {
     });
   }
 
+  async removeBookFromList(
+    uid_firebase: string,
+    id: string,
+    list_type: string,
+  ) {
+    return this.prisma.listaLivros.deleteMany({
+      where: {
+        uid_firebase,
+        isbn: id,
+        tipo_lista: list_type as any,
+      },
+    });
+  }
+
   async checkBookInList(uid_firebase: string, id: string) {
     const lists = await this.prisma.listaLivros.findMany({
       where: {
