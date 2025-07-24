@@ -47,11 +47,18 @@ export class ListsController {
   }
 
   @Delete('/')
-  async removeBook(@Body() body: any) {
-    return this.listsService.removeBookFromList(
-      body.uid_firebase,
-      body.id,
-      body.list_type,
-    );
+  async removeBook(
+    @Query('uid_firebase') uid: string,
+    @Query('id') id: string,
+    @Query('list_type') list_type: string,
+  ) {
+
+    if (!uid || !id || !list_type) {
+      throw new BadRequestException(
+        'Parâmetros uid_firebase, id e list_type são obrigatórios.',
+      );
+    }
+
+    return this.listsService.removeBookFromList(uid, id, list_type);
   }
 }
