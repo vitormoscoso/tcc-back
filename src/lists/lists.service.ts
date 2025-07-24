@@ -1,9 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { AuthorsService } from 'src/authors/authors.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { FirebaseAdminService } from 'src/firebase/firebase.service';
-
 
 @Injectable()
 export class ListsService {
@@ -17,12 +15,12 @@ export class ListsService {
     return this.prisma.listaLivros.findMany({
       where: {
         uid_firebase,
-        tipo_lista: list_type as any
+        tipo_lista: list_type as any,
       },
     });
   }
 
-  async addBookToList(data: any){
+  async addBookToList(data: any) {
     return this.prisma.listaLivros.create({
       data: {
         tipo_lista: data.tipo_lista,
@@ -30,5 +28,25 @@ export class ListsService {
         uid_firebase: data.uid_firebase,
       },
     });
+  }
+
+  async checkBookInList(uid_firebase: string, id: string) {
+    const lists = await this.prisma.listaLivros.findMany({
+      where: {
+        uid_firebase,
+        isbn: id,
+      },
+      select: {
+        tipo_lista: true,
+      },
+    });
+
+    const types = lists.map((item) => item.tipo_lista);
+
+    return {
+      favourites: types.includes('favoritos'),
+      to_read: types.includes('para_ler'),
+      reviewed: types.includes('avaliados'),
+    };
   }
 }
