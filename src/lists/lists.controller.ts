@@ -27,6 +27,20 @@ export class ListsController {
     return this.listsService.getList(uid_firebase, tipo_lista);
   }
 
+  @Get('details')
+  async getListDetails(
+    @Query('uid') uid_firebase: string,
+    @Query('tipo_lista') tipo_lista: string,
+  ) {
+    if (!uid_firebase || !tipo_lista) {
+      throw new BadRequestException(
+        'Parâmetros obrigatórios: uid e tipo_lista.',
+      );
+    }
+
+    return this.listsService.getListDetails(uid_firebase, tipo_lista);
+  }
+
   @Get('check')
   async checkBookInList(
     @Query('uid_firebase') uid: string,

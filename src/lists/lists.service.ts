@@ -1,14 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { BooksService } from 'src/books/books.service';
 import { PrismaService } from 'src/database/prisma.service';
-import { FirebaseAdminService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class ListsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
-    private readonly firebase: FirebaseAdminService,
+    private readonly booksService: BooksService,
   ) {}
 
   async getList(uid_firebase: string, list_type: string) {
@@ -18,6 +18,23 @@ export class ListsService {
         tipo_lista: list_type as any,
       },
     });
+  }
+
+  async getListDetails(uid_firebase: string, list_type: string) {
+    const books = await this.getList(uid_firebase, list_type);
+    const isbns = books.map((livro) => livro.isbn);
+
+    const details = await Promise.all(
+      isbns.map(async (isbn) => {
+        try {
+          return await this.booksService.getBookDetailsById(isbn);
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    return details.filter((book) => book !== null);
   }
 
   async addBookToList(data: any) {
