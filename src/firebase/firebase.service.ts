@@ -19,6 +19,7 @@ export class FirebaseAdminService {
     try {
       const userRecord = await admin.auth().getUser(uid);
       return {
+        uid: userRecord.uid,
         displayName: userRecord.displayName,
         photoURL: userRecord.photoURL,
         email: userRecord.email,
